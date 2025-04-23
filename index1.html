@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Po Tài Xỉu</title>
+  <link rel="stylesheet" href="index1.css">
+</head>
+<body>
+  <div id="auth">
+    <h2>Đăng nhập / Đăng ký</h2>
+    <input type="text" id="username" placeholder="Tên người chơi" />
+    <input type="password" id="password" placeholder="Mật khẩu" />
+    <button onclick="register()">Đăng ký</button>
+    <button onclick="login()">Đăng nhập</button>
+    <p id="authMsg"></p>
+  </div>
+
+  <div id="game" style="display:none;">
+    <h2>Xin chào, <span id="playerName"></span>!</h2>
+    <p>Số dư: <span id="balance">0</span>$</p>
+
+    <div id="diceContainer">
+      <img id="dice1" src="dice1.png" width="60"/>
+      <img id="dice2" src="dice2.png" width="60"/>
+      <img id="dice3" src="dice3.png" width="60"/>
+    </div>
+
+    <p>Kết quả: <span id="resultText">-</span></p>
+
+    <div id="betSection">
+      <input type="number" id="betAmount" placeholder="Số tiền cược" />
+      <button onclick="placeBet('Tài')">Tài</button>
+      <button onclick="placeBet('Xỉu')">Xỉu</button>
+    </div>
+
+    <p id="countdown">Chờ lượt tiếp theo: <span id="timer">30</span>s</p>
+
+    <div id="giftcodeSection">
+      <input type="text" id="giftcodeInput" placeholder="Nhập giftcode" />
+      <button onclick="redeemGiftcode()">Nhận quà</button>
+    </div>
+
+    <div id="leaderboardSection">
+      <h3>Bảng xếp hạng</h3>
+      <ul id="leaderboard"></ul>
+    </div>
+
+    <div id="eventSection">
+      <h3>Sự kiện</h3>
+      <p id="eventInfo">Không có sự kiện nào</p>
+    </div>
+
+    <div id="adminSection" style="display:none;">
+      <h3>Admin Control</h3>
+      <input type="text" id="targetUser" placeholder="Tên người chơi"/>
+      <input type="number" id="addMoneyAmount" placeholder="Thêm tiền"/>
+      <button onclick="addMoney()">Thêm tiền</button><br><br>
+
+      <label>Kết quả:</label>
+      <select id="forceResult">
+        <option value="">Ngẫu nhiên</option>
+        <option value="Tai">Tài</option>
+        <option value="Xiu">Xỉu</option>
+        <option value="NoHu1">Nổ Hủ - 1 1 1</option>
+        <option value="NoHu6">Nổ Hủ - 6 6 6</option>
+      </select><br><br>
+
+      <label>Sự kiện:</label>
+      <input type="text" id="eventText" placeholder="Nội dung sự kiện"/>
+      <button onclick="setEvent()">Cập nhật sự kiện</button><br><br>
+
+      <label>Tạo Giftcode:</label>
+      <input type="text" id="newGiftcode" placeholder="Giftcode"/>
+      <input type="number" id="giftcodeValue" placeholder="Giá trị"/>
+      <button onclick="createGiftcode()">Tạo giftcode</button>
+    </div>
+
+    <button onclick="logout()">Đăng xuất</button>
+  </div>
+  <script>
+    let currentUser = null;
+    let countdown = 30;
+    let interval;
+    let gameState = {
+      forceResult: "",
+      eventText: "",
+      giftcodes: [],
+    };
+    
+    function saveUsers(users) {
+      localStorage.setItem("users", JSON.stringify(users));
+    }
+    
+    function getUsers() {
+      return JSON.parse(localStorage.getItem("users") || "{}");
+    }
+    
+    function register() {
+      const u = username.value.trim();
+      const p = password.value;
+      let users = getUsers();
+      if (users[u]) return authMsg.innerText = "Tên đã tồn tại!";
+      users[u] = { password: p, money: 1000, history: [] };
+      saveUsers(users);
+      authMsg.innerText = "Đăng ký thành công! Bạn có thể đăng nhập.";
+    }
+    
+    function login() {
+      const u = username.value.trim();
+      const p = password.value;
+      let users = getUsers();
+      if (!users[u] || users[u].password !== p) return authMsg.innerText = "Sai thông tin!";
+      currentUser = u;
+      gameState.forceResult = "";
+      auth.style.display = "none";
+      game.style.display = "block";
+      playerName.innerText = u;
+      if (u === "po") adminSection.style.display = "block";
+      updateBalance();
+      updateLeaderboard();
+      startCountdown();
+    }
+    
+    function logout() {
+      location.reload();
+    }
+    
+    function updateBalance() {
+      let users = getUsers();
+      balance.innerText = users[currentUser].money;
+    }
+    
+    function placeBet(type) {
+      let users = getUsers();
+      const amount = parseInt(betAmount.value);
+      if (users[currentUser].money <= 0) return alert("Bạn hết tiền!");
+      if (isNaN(amount) || amount <= 0 || amount > users[currentUser].money) return alert("Cược không hợp lệ!");
+      users[currentUser].money -= amount;
+      const result = rollDice(gameState.forceResult);
+      const isWin = (result.total >= 11 && type === "Tài") || (result.total <= 10 && type === "Xỉu");
+      const isJackpot = result.jackpot;
+    
+      if (isWin || isJackpot) {
+        let reward = isJackpot ? amount * 10 : amount * 2;
+        users[currentUser].money += reward;
+        alert(isJackpot ? "NỔ HỦ! Bạn thắng lớn!" : "Bạn thắng!");
+      } else {
+        alert("Thua rồi...");
+      }
+    
+      users[currentUser].history.push({ type, amount, result });
+      saveUsers(users);
+      updateBalance();
+      updateLeaderboard();
+      showDice(result.dice);
+    }
+    
+    function rollDice(forced = "") {
+      let d = [rand(), rand(), rand()];
+      if (forced === "Tai") {
+        d = [6, 5, 6];
+      } else if (forced === "Xiu") {
+        d = [1, 2, 3];
+      } else if (forced === "NoHu1") {
+        d = [1, 1, 1];
+      } else if (forced === "NoHu6") {
+        d = [6, 6, 6];
+      }
+    
+      const total = d.reduce((a, b) => a + b, 0);
+      const jackpot = (d[0] === d[1] && d[1] === d[2] && (d[0] === 1 || d[0] === 6));
+      resultText.innerText = `${d.join(" - ")} (${total})`;
+      return { total, dice: d, jackpot };
+    }
+    
+    function rand() {
+      return Math.floor(Math.random() * 6) + 1;
+    }
+    
+    function showDice(dice) {
+      dice1.src = `dice${dice[0]}.png`;
+      dice2.src = `dice${dice[1]}.png`;
+      dice3.src = `dice${dice[2]}.png`;
+    }
+    
+    function startCountdown() {
+      timer.innerText = countdown;
+      interval = setInterval(() => {
+        countdown--;
+        timer.innerText = countdown;
+        if (countdown <= 0) {
+          countdown = 30;
+          timer.innerText = countdown;
+        }
+      }, 1000);
+    }
+    
+    function createGiftcode() {
+      const code = newGiftcode.value.trim();
+      const val = parseInt(giftcodeValue.value);
+      if (!code || isNaN(val)) return alert("Nhập đúng thông tin!");
+      gameState.giftcodes.push({ code, value: val });
+      alert("Tạo giftcode thành công!");
+    }
+    
+    function redeemGiftcode() {
+      const code = giftcodeInput.value.trim();
+      const gc = gameState.giftcodes.find(g => g.code === code);
+      if (!gc) return alert("Sai giftcode!");
+      let users = getUsers();
+      users[currentUser].money += gc.value;
+      gameState.giftcodes = gameState.giftcodes.filter(g => g.code !== code);
+      alert("Nhận thành công " + gc.value + "$!");
+      saveUsers(users);
+      updateBalance();
+    }
+    
+    function addMoney() {
+      const user = targetUser.value.trim();
+      const amount = parseInt(addMoneyAmount.value);
+      let users = getUsers();
+      if (!users[user]) return alert("Không tồn tại!");
+      users[user].money += amount;
+      saveUsers(users);
+      alert("Đã cộng tiền!");
+    }
+    
+    function setEvent() {
+      const txt = eventText.value.trim();
+      gameState.eventText = txt;
+      eventInfo.innerText = txt || "Không có sự kiện nào";
+    }
+    
+    function updateLeaderboard() {
+      let users = getUsers();
+      const sorted = Object.entries(users)
+        .map(([name, data]) => ({ name, money: data.money }))
+        .sort((a, b) => b.money - a.money)
+        .slice(0, 5);
+      leaderboard.innerHTML = sorted.map(u => `<li>${u.name}: ${u.money}$</li>`).join("");
+    }
+    </script>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      padding: 20px;
+    }
+    input, button {
+      margin: 5px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      cursor: pointer;
+    }
+    .dice-container {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .dice-container img {
+      width: 60px;
+      margin: 0 10px;
+    }
+    .admin-panel {
+      margin-top: 30px;
+      border-top: 2px dashed #666;
+      padding-top: 20px;
+    }
+    #leaderboard {
+      list-style: none;
+      padding: 0;
+    }
+    #leaderboard li {
+      text-align: left;
+      margin-left: 40%;
+    }
+    </style>
+    
+    </body>
+    </html>
+        
