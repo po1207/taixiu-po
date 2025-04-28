@@ -1,0 +1,1407 @@
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <title>PO.COM Home with Tài Xỉu Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Russo+One&display=swap");
+    .font-orbitron {
+      font-family: "Orbitron", sans-serif;
+    }
+    .font-russo {
+      font-family: "Russo One", sans-serif;
+    }
+    /* Dice animation */
+    @keyframes shake {
+      0% { transform: rotate(0deg); }
+      20% { transform: rotate(15deg); }
+      40% { transform: rotate(-15deg); }
+      60% { transform: rotate(15deg); }
+      80% { transform: rotate(-15deg); }
+      100% { transform: rotate(0deg); }
+    }
+    .shake {
+      animation: shake 1s ease-in-out;
+    }
+    /* marquee style for two lines */
+    .marquee-container {
+      position: relative;
+      overflow: hidden;
+      background: #1a1307;
+      border-bottom: 1px solid #3a2a0f;
+      height: 24px;
+      font-family: 'Roboto Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: #f07f0a;
+      user-select: none;
+    }
+    .marquee {
+      display: block;
+      white-space: nowrap;
+      will-change: transform;
+      animation: marquee 20s linear infinite;
+      padding-left: 100%;
+      box-sizing: content-box;
+    }
+    .marquee:nth-child(2) {
+      animation-delay: 10s;
+      color: #f07f0a;
+    }
+    @keyframes marquee {
+      0% {
+        transform: translateX(0%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      .marquee-container {
+        height: 20px;
+        font-size: 12px;
+      }
+    }
+    /* Cards grid */
+    main > div {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+      gap: 1rem;
+      max-width: 1200px;
+      margin: 1rem auto 0;
+      padding: 0 1rem;
+    }
+    button.card {
+      background: linear-gradient(to bottom, #3a2a0f, #1a1307);
+      border: 1px solid #b38a2f;
+      border-radius: 0.75rem;
+      color: white;
+      font-family: 'Orbitron', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+    button.card:hover {
+      border-color: #f7e9a7;
+    }
+    button.card img {
+      max-width: 100%;
+      border-radius: 0.5rem;
+      margin-bottom: 0.5rem;
+      object-fit: cover;
+    }
+    button.card h3 {
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin-bottom: 0.25rem;
+      text-align: center;
+      color: #f7e9a7;
+      text-shadow: 1px 1px 2px #000;
+    }
+    button.card p {
+      font-size: 0.875rem;
+      color: #b38a2f;
+      margin: 0;
+      text-align: center;
+      line-height: 1.2;
+    }
+    /* Header user info */
+    #userInfoBar {
+      max-width: 1200px;
+      margin: 0.5rem auto 0;
+      padding: 0 1rem;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1rem;
+      font-family: 'Orbitron', sans-serif;
+      color: #bfa14a;
+      font-weight: 700;
+      font-size: 0.875rem;
+      user-select: none;
+      flex-wrap: wrap;
+    }
+    #userInfoBar span {
+      white-space: nowrap;
+    }
+    #logoutBtn {
+      cursor: pointer;
+      background: linear-gradient(to bottom, #bfa14a, #e0c14a);
+      color: #0a1f2f;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.3s;
+    }
+    #logoutBtn:hover {
+      background-color: #f7e9a7;
+    }
+    #adminPanelBtn, #redeemCodeBtnHeader {
+      cursor: pointer;
+      background: linear-gradient(to bottom, #bfa14a, #e0c14a);
+      color: #0a1f2f;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.3s;
+      white-space: nowrap;
+    }
+    #adminPanelBtn:hover, #redeemCodeBtnHeader:hover {
+      background-color: #f7e9a7;
+    }
+    /* Disabled betting buttons */
+    button.card[disabled], button[disabled] {
+      cursor: not-allowed !important;
+      opacity: 0.6 !important;
+    }
+    /* Highlight for selected bet amount */
+    .bet-amount-selected {
+      box-shadow: 0 0 10px 3px #bfa14a;
+      border-color: #f7e9a7 !important;
+      color: #f7e9a7 !important;
+      font-weight: 900 !important;
+    }
+    /* Highlight for selected side */
+    .side-selected {
+      color: #f7e9a7 !important;
+      text-shadow: 0 0 8px #f7e9a7;
+      font-weight: 900 !important;
+      cursor: default !important;
+    }
+    /* Close button for game UI */
+    #gameCloseBtn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      background: #bfa14a;
+      color: #1a1307;
+      font-weight: 900;
+      font-size: 20px;
+      line-height: 28px;
+      text-align: center;
+      border-radius: 9999px;
+      cursor: pointer;
+      z-index: 30;
+      user-select: none;
+      transition: background-color 0.3s;
+    }
+    #gameCloseBtn:hover {
+      background-color: #f7e9a7;
+    }
+  </style>
+</head>
+<body class="bg-[#1a1307] text-white select-none min-h-screen flex flex-col">
+  <!-- Top marquee bars with PO.COM text -->
+  <div class="marquee-container">
+    <div class="marquee" aria-label="Scrolling warning message line 1" role="marquee">
+      PO.COM là tên miền duy nhất. Không truy cập các đường link giả mạo khác &nbsp;&nbsp;&nbsp;&nbsp; PO.COM là tên miền duy nhất. Không truy cập các đường link giả mạo khác &nbsp;&nbsp;&nbsp;&nbsp; PO.COM là tên miền duy nhất. Không truy cập các đường link giả mạo khác
+    </div>
+    <div class="marquee" aria-label="Scrolling warning message line 2" role="marquee">
+      PO.COM là tên miền duy nhất. Không truy cập các đường link giả mạo khác &nbsp;&nbsp;&nbsp;&nbsp; PO.COM là tên miền duy nhất. Không truy cập các đường link giả mạo khác &nbsp;&nbsp;&nbsp;&nbsp; PO.COM là tên miền duy nhất. Không truy cập các đường link giả mạo khác
+    </div>
+  </div>
+
+  <!-- Navigation bar -->
+  <header class="max-w-[1200px] mx-auto px-4 py-3 flex justify-center sm:justify-start gap-4 font-orbitron text-[#b38a2f] uppercase tracking-widest text-xs sm:text-sm">
+    <button class="border border-[#b38a2f] rounded px-3 py-1 bg-[#3a2a0f]" id="allGamesBtn">ALL GAMES</button>
+    <button class="border border-[#b38a2f] rounded px-3 py-1 bg-[#3a2a0f]">HOT</button>
+    <button class="border border-[#b38a2f] rounded px-3 py-1 bg-[#3a2a0f]">GAME BÀI</button>
+    <button class="border border-[#b38a2f] rounded px-3 py-1 bg-[#3a2a0f]" id="taiXiuBtn">TÀI XỈU</button>
+    <button class="border border-[#b38a2f] rounded px-3 py-1 bg-[#3a2a0f]">SLOTS</button>
+    <button class="border border-[#b38a2f] rounded px-3 py-1 bg-[#3a2a0f]">KHÁC</button>
+  </header>
+
+  <!-- User info bar -->
+  <div id="userInfoBar" class="hidden" role="region" aria-live="polite" aria-atomic="true">
+    <span id="userWelcome"></span>
+    <span>Tiền: <span id="userMoneyDisplay">0</span> $</span>
+    <button id="redeemCodeBtnHeader" aria-label="Nhập code">Nhập Code</button>
+    <button id="adminPanelBtn" aria-label="Bảng điều khiển Admin" class="hidden">Admin Panel</button>
+    <button id="logoutBtn" aria-label="Đăng xuất">Đăng xuất</button>
+  </div>
+
+  <!-- Main content: cards -->
+  <main>
+    <div id="cardsContainer">
+      <button class="card" aria-label="Tặng 50,000đ khi nạp đủ 1 triệu qua thẻ cào">
+        <img src="https://storage.googleapis.com/a1aa/image/ec027434-d10a-46d3-0f2f-1e4492d4bc26.jpg" alt="Vietnamese currency bills background" width="140" height="80" draggable="false" />
+        <h3>TẶNG</h3>
+        <p>50,000đ</p>
+        <p>KHI NẠP ĐỦ 1 TRIỆU</p>
+        <p>QUA THẺ CÀO</p>
+        <button class="mt-2 bg-[#b38a2f] text-[#3a2a0f] font-bold text-xs rounded px-6 py-1 hover:bg-yellow-400 transition">NẠP NGAY</button>
+      </button>
+      <button class="card" id="taiXiuCard" aria-label="Game Tài Xỉu">
+        <img src="https://storage.googleapis.com/a1aa/image/022053bc-08ea-469a-1463-deffb2eb6af2.jpg" alt="3D white dice with black dots shining on golden background" width="140" height="140" draggable="false" />
+        <h3>TÀI XỈU</h3>
+        <p>619,461,817 - 492,793,255</p>
+        <p class="text-yellow-400 font-bold">$54,638,520,545</p>
+      </button>
+      <button class="card" aria-label="Game Tài Xỉu MD5">
+        <img src="https://storage.googleapis.com/a1aa/image/dc51b227-6d1b-419e-8f64-e4b94d780ad1.jpg" alt="3D red dice with white dots shining on dark background" width="140" height="140" draggable="false" />
+        <h3>TÀI XỈU MD5</h3>
+        <p>$138,897,455 - $39,218,584</p>
+      </button>
+      <button class="card" aria-label="Game Xóc Đĩa">
+        <img src="https://storage.googleapis.com/a1aa/image/878c20ca-a898-402f-7751-0a268f7115ef.jpg" alt="Golden plate with red and white coins spinning, casino style" width="140" height="180" draggable="false" />
+        <h3>XÓC ĐĨA</h3>
+        <p class="text-yellow-400 font-bold">$5,442,332,356</p>
+      </button>
+    </div>
+  </main>
+
+  <!-- Login/Register Modal -->
+  <div
+    id="authModal"
+    class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden"
+  >
+    <div
+      class="bg-gradient-to-b from-[#0a2a4a] to-[#1a4a7a] rounded-3xl p-8 w-full max-w-md text-[#f7e9a7] relative"
+    >
+      <h2 class="text-3xl font-russo mb-6 text-center font-russo">Đăng ký / Đăng nhập PO</h2>
+      <div id="registerForm" class="">
+        <input
+          id="regUsername"
+          type="text"
+          placeholder="Tên đăng nhập"
+          class="w-full mb-4 p-3 rounded-lg bg-[#0a1f2f] border border-[#bfa14a] text-[#f7e9a7] font-orbitron text-lg"
+          autocomplete="username"
+        />
+        <input
+          id="regPassword"
+          type="password"
+          placeholder="Mật khẩu"
+          class="w-full mb-6 p-3 rounded-lg bg-[#0a1f2f] border border-[#bfa14a] text-[#f7e9a7] font-orbitron text-lg"
+          autocomplete="new-password"
+        />
+        <button
+          id="registerBtn"
+          class="w-full py-3 rounded-2xl bg-gradient-to-b from-[#bfa14a] to-[#e0c14a] font-orbitron font-bold text-xl text-[#0a1f2f] mb-4 hover:brightness-110 transition"
+        >
+          Đăng ký
+        </button>
+        <p class="text-center text-sm mb-2">
+          Đã có tài khoản?
+          <button
+            id="showLogin"
+            class="text-[#bfa14a] underline hover:text-[#e0c14a]"
+          >
+            Đăng nhập
+          </button>
+        </p>
+      </div>
+      <div id="loginForm" class="hidden">
+        <input
+          id="loginUsername"
+          type="text"
+          placeholder="Tên đăng nhập"
+          class="w-full mb-4 p-3 rounded-lg bg-[#0a1f2f] border border-[#bfa14a] text-[#f7e9a7] font-orbitron text-lg"
+          autocomplete="username"
+        />
+        <input
+          id="loginPassword"
+          type="password"
+          placeholder="Mật khẩu"
+          class="w-full mb-6 p-3 rounded-lg bg-[#0a1f2f] border border-[#bfa14a] text-[#f7e9a7] font-orbitron text-lg"
+          autocomplete="current-password"
+        />
+        <button
+          id="loginBtn"
+          class="w-full py-3 rounded-2xl bg-gradient-to-b from-[#2a3a9a] to-[#1a2a7a] font-orbitron font-bold text-xl text-[#b7b7ff] mb-4 hover:brightness-110 transition"
+        >
+          Đăng nhập
+        </button>
+        <p class="text-center text-sm mb-2">
+          Chưa có tài khoản?
+          <button
+            id="showRegister"
+            class="text-[#bfa14a] underline hover:text-[#e0c14a]"
+          >
+            Đăng ký
+          </button>
+        </p>
+      </div>
+      <button
+        id="closeAuth"
+        class="absolute top-4 right-4 text-[#bfa14a] text-2xl hover:text-[#e0c14a]"
+        aria-label="Close"
+      >
+        &times;
+      </button>
+      <p id="authMessage" class="text-center text-red-500 mt-2 min-h-[1.25rem]"></p>
+    </div>
+  </div>
+
+  <!-- Admin Modal -->
+  <div
+    id="adminModal"
+    class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-60 hidden"
+  >
+    <div
+      class="bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] rounded-3xl p-8 w-full max-w-lg text-[#f7e9a7] relative"
+    >
+      <h2 class="text-3xl font-russo mb-6 text-center">Admin Panel</h2>
+      <div class="mb-6">
+        <h3 class="font-orbitron text-xl mb-2 border-b border-[#bfa14a] pb-1">Add Money to User</h3>
+        <input
+          id="adminAddMoneyUsername"
+          type="text"
+          placeholder="Tên đăng nhập người chơi"
+          class="w-full mb-3 p-3 rounded-lg bg-[#0a1f2f] border border-[#bfa14a] text-[#f7e9a7] font-orbitron text-lg"
+          autocomplete="off"
+        />
+        <input
+          id="adminAddMoneyAmount"
+          type="number"
+          min="1"
+          placeholder="Số tiền thêm"
+          class="w-full mb-3 p-3 rounded-lg bg-[#0a1f2f] border border-[#bfa14a] text-[#f7e9a7] font-orbitron text-lg"
+        />
+        <button
+          id="adminAddMoneyBtn"
+          class="w-full py-3 rounded-2xl bg-gradient-to-b from-[#bfa14a] to-[#e0c14a] font-orbitron font-bold text-xl text-[#0a1f2f] hover:brightness-110 transition"
+        >
+          Thêm tiền
+        </button>
+        <p id="adminAddMoneyMessage" class="text-center mt-2 min-h-[1.25rem]"></p>
+      </div>
+      <div>
+        <h3 class="font-orbitron text-xl mb-2 border-b border-[#bfa14a] pb-1">Create Code</h3>
+        <input
+          id="adminCreateCodeAmount"
+          type="number"
+          min="1"
+          placeholder="Số tiền code"
+          class="w-full mb-3 p-3 rounded-lg bg-[#0a1f2f] border border-[#bfa14a] text-[#f7e9a7] font-orbitron text-lg"
+        />
+        <button
+          id="adminCreateCodeBtn"
+          class="w-full py-3 rounded-2xl bg-gradient-to-b from-[#bfa14a] to-[#e0c14a] font-orbitron font-bold text-xl text-[#0a1f2f] hover:brightness-110 transition"
+        >
+          Tạo code
+        </button>
+        <p id="adminCreateCodeMessage" class="text-center mt-2 min-h-[1.25rem] break-words"></p>
+      </div>
+      <button
+        id="closeAdmin"
+        class="absolute top-4 right-4 text-[#bfa14a] text-2xl hover:text-[#e0c14a]"
+        aria-label="Close Admin Panel"
+      >
+        &times;
+      </button>
+    </div>
+  </div>
+
+  <!-- Tài Xỉu Game UI (hidden initially) -->
+  <div
+    id="gameUI"
+    class="relative w-full max-w-[720px] aspect-[720/320] rounded-[40px] overflow-visible mx-auto mt-6 hidden"
+  >
+    <img
+      alt="Blue oval background with gold border and decorative gold dragon on top center"
+      class="absolute inset-0 w-full h-full object-cover rounded-[40px]"
+      height="320"
+      src="https://storage.googleapis.com/a1aa/image/86e9ea89-ac48-44f6-4503-a3ee472ab7f4.jpg"
+      style="z-index: 1;"
+      width="720"
+      draggable="false"
+    />
+    <button id="gameCloseBtn" aria-label="Close Tài Xỉu Game">&times;</button>
+    <div
+      class="absolute top-4 left-1/2 -translate-x-1/2 flex items-center space-x-4 px-6 py-1 rounded-full border border-[#bfa14a] bg-gradient-to-r from-[#3a2e0a] to-[#6a5a1a] text-[#f7e9a7] font-orbitron text-[22px] select-none z-20"
+      style="width: 360px;"
+    >
+      <span id="totalMoney">856,326,847</span>
+      <span class="text-[14px] font-normal ml-2" id="roundNumber">#1</span>
+    </div>
+    <div class="absolute top-16 left-4 flex flex-col space-y-4 z-20">
+      <button
+        aria-label="Statistics"
+        class="w-12 h-12 rounded-full bg-gradient-to-b from-[#2a4a6a] to-[#1a2a3a] border-2 border-[#2a4a6a] flex items-center justify-center cursor-pointer"
+        style="box-shadow: inset 0 0 6px #1a2a3a;"
+      >
+        <i class="fas fa-chart-bar text-[#bfa14a] text-xl"></i>
+      </button>
+      <button
+        aria-label="Help"
+        class="w-12 h-12 rounded-full bg-gradient-to-b from-[#2a4a6a] to-[#1a2a3a] border-2 border-[#2a4a6a] flex items-center justify-center cursor-pointer"
+        style="box-shadow: inset 0 0 6px #1a2a3a;"
+      >
+        <i class="fas fa-question text-[#bfa14a] text-xl"></i>
+      </button>
+      <button
+        aria-label="History"
+        class="w-12 h-12 rounded-full bg-gradient-to-b from-[#2a4a6a] to-[#1a2a3a] border-2 border-[#2a4a6a] flex items-center justify-center cursor-pointer"
+        style="box-shadow: inset 0 0 6px #1a2a3a;"
+      >
+        <i class="fas fa-file-alt text-[#bfa14a] text-xl"></i>
+      </button>
+    </div>
+    <div class="absolute top-16 right-4 flex flex-col space-y-4 z-20">
+      <button
+        aria-label="Trophy"
+        class="w-12 h-12 rounded-full bg-gradient-to-b from-[#2a4a6a] to-[#1a2a3a] border-2 border-[#2a4a6a] flex items-center justify-center cursor-pointer"
+        style="box-shadow: inset 0 0 6px #1a2a3a;"
+      >
+        <i class="fas fa-trophy text-[#bfa14a] text-xl"></i>
+      </button>
+      <button
+        aria-label="Chat"
+        class="w-12 h-12 rounded-full bg-gradient-to-b from-[#2a4a6a] to-[#1a2a3a] border-2 border-[#2a4a6a] flex items-center justify-center cursor-pointer"
+        style="box-shadow: inset 0 0 6px #1a2a3a;"
+      >
+        <i class="fas fa-comment-alt text-[#bfa14a] text-xl"></i>
+      </button>
+      <button
+        aria-label="Hand"
+        class="w-12 h-12 rounded-full bg-gradient-to-b from-[#2a4a6a] to-[#1a2a3a] border-2 border-[#2a4a6a] flex items-center justify-center cursor-pointer"
+        style="box-shadow: inset 0 0 6px #1a2a3a;"
+      >
+        <i class="fas fa-hand-paper text-[#bfa14a] text-xl"></i>
+      </button>
+    </div>
+    <button
+      aria-label="Info"
+      class="absolute top-4 left-4 w-12 h-12 rounded-full bg-gradient-to-b from-[#2a4a6a] to-[#1a2a3a] border-2 border-[#2a4a6a] flex items-center justify-center cursor-pointer z-20"
+      style="box-shadow: inset 0 0 6px #1a2a3a;"
+    >
+      <i class="fas fa-info text-[#bfa14a] text-xl"></i>
+    </button>
+
+    <!-- Money display bottom left -->
+    <div
+      id="moneyDisplay"
+      class="absolute bottom-4 left-4 bg-gradient-to-b from-[#1a2a3a] to-[#0a1a2a] border border-[#bfa14a] rounded-xl px-4 py-2 text-[#f7e9a7] font-orbitron font-bold text-lg select-none z-30 shadow-lg"
+      style="min-width: 140px; text-align: center;"
+    >
+      Tiền: <span id="userMoneyDisplayGame">0</span> $
+    </div>
+
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[620px] h-[180px] rounded-[80px] bg-gradient-to-r from-[#0f4a7a] to-[#1a6a9a] border-4 border-[#bfa14a] flex items-center justify-between px-12 select-none z-10"
+      style="box-shadow: inset 0 0 20px #0a2a4a;"
+    >
+      <div class="flex flex-col items-center space-y-1 w-[180px] relative">
+        <div
+          id="taiLabel"
+          class="text-[48px] font-russo text-[#bfbfbf] drop-shadow-[2px_2px_0_#000] select-none cursor-pointer"
+          style="text-shadow: 2px 2px 0 #000000;"
+          title="Chọn TÀI"
+        >
+          TÀI
+        </div>
+        <div
+          class="text-[24px] font-orbitron text-[#f7e9a7] flex items-center space-x-1 select-none"
+        >
+          <span id="taiCount">3,087</span>
+          <i class="fas fa-male text-[#f7e9a7] text-[18px]"></i>
+        </div>
+        <div
+          class="text-[28px] font-orbitron text-[#f7e9a7] font-bold select-none"
+          style="text-shadow: 1px 1px 0 #000000;"
+          id="taiMoney"
+        >
+          1,574,903,422
+        </div>
+        <button
+          id="taiBetAmount"
+          class="mt-2 w-[120px] h-10 rounded-[20px] bg-gradient-to-b from-[#0a0a0a] to-[#3a3a3a] border border-[#bfa14a] text-[#f7e9a7] font-orbitron text-[18px] font-bold select-none cursor-pointer"
+          title="Chọn TÀI để đặt cược"
+        >
+          0
+        </button>
+        <!-- Highlight overlay for selection -->
+        <div id="taiHighlight" class="pointer-events-none absolute inset-0 rounded-[80px] bg-yellow-400 bg-opacity-20 opacity-0 transition-opacity"></div>
+      </div>
+      <div
+        id="centerNumber"
+        class="w-[120px] h-[120px] rounded-full bg-gradient-to-b from-[#1a1a1a] to-[#3a3a3a] border-4 border-[#bfa14a] flex flex-col items-center justify-center select-none relative"
+        style="box-shadow: inset 0 0 20px #000000;"
+      >
+        <span
+          id="countdownTimer"
+          class="text-[28px] font-orbitron font-bold text-[#f7e9a7] drop-shadow-[2px_2px_0_#000]"
+          style="text-shadow: 2px 2px 0 #000000;"
+          >30</span
+        >
+        <span
+          id="centerNumberValue"
+          class="text-[56px] font-orbitron font-bold text-[#f7e9a7] drop-shadow-[2px_2px_0_#000] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-700"
+          style="text-shadow: 2px 2px 0 #000000;"
+          >34</span
+        >
+        <img
+          id="diceImage"
+          src=""
+          alt="Dice face showing result"
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 opacity-0 transition-opacity duration-700"
+          draggable="false"
+        />
+      </div>
+      <div class="flex flex-col items-center space-y-1 w-[180px] relative">
+        <div
+          id="xiuLabel"
+          class="text-[48px] font-russo text-[#bfbfbf] drop-shadow-[2px_2px_0_#000] select-none cursor-pointer"
+          style="text-shadow: 2px 2px 0 #000000;"
+          title="Chọn XỈU"
+        >
+          XỈU
+        </div>
+        <div
+          class="text-[24px] font-orbitron text-[#f7e9a7] flex items-center space-x-1 select-none"
+        >
+          <span id="xiuCount">827</span>
+          <i class="fas fa-male text-[#f7e9a7] text-[18px]"></i>
+        </div>
+        <div
+          class="text-[28px] font-orbitron text-[#f7e9a7] font-bold select-none"
+          style="text-shadow: 1px 1px 0 #000000;"
+          id="xiuMoney"
+        >
+          335,401,356
+        </div>
+        <button
+          id="xiuBetAmount"
+          class="mt-2 w-[120px] h-10 rounded-[20px] bg-gradient-to-b from-[#b06a1a] to-[#e0a14a] border border-[#bfa14a] text-[#f7e9a7] font-orbitron text-[18px] font-bold select-none cursor-pointer"
+          title="Chọn XỈU để đặt cược"
+        >
+          CƯỢC
+        </button>
+        <!-- Highlight overlay for selection -->
+        <div id="xiuHighlight" class="pointer-events-none absolute inset-0 rounded-[80px] bg-yellow-400 bg-opacity-20 opacity-0 transition-opacity"></div>
+      </div>
+    </div>
+    <div
+      class="absolute top-[calc(50%+110px)] left-1/2 -translate-x-1/2 flex space-x-2 z-20"
+      style="width: 360px;"
+    >
+      <div
+        class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#bfa14a] shadow-[0_0_6px_#bfa14a]"
+      ></div>
+      <div class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#3a3a3a]"></div>
+      <div
+        class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#bfa14a] shadow-[0_0_6px_#bfa14a]"
+      ></div>
+      <div class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#3a3a3a]"></div>
+      <div
+        class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#bfa14a] shadow-[0_0_6px_#bfa14a]"
+      ></div>
+      <div class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#3a3a3a]"></div>
+      <div
+        class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#bfa14a] shadow-[0_0_6px_#bfa14a]"
+      ></div>
+      <div class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#3a3a3a]"></div>
+      <div
+        class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#bfa14a] shadow-[0_0_6px_#bfa14a]"
+      ></div>
+      <div class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#3a3a3a]"></div>
+      <div
+        class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#bfa14a] shadow-[0_0_6px_#bfa14a]"
+      ></div>
+      <div class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#3a3a3a]"></div>
+      <div
+        class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#bfa14a] shadow-[0_0_6px_#bfa14a]"
+      ></div>
+      <div class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#3a3a3a]"></div>
+      <div
+        class="w-6 h-6 rounded-full border-2 border-[#bfa14a] bg-[#bfa14a] shadow-[0_0_6px_#bfa14a]"
+      ></div>
+    </div>
+    <div
+      class="absolute top-[calc(50%+150px)] left-1/2 -translate-x-1/2 flex space-x-4 z-20 w-[620px] max-w-full px-4"
+    >
+      <button
+        class="flex-1 max-w-[80px] py-1 rounded-[12px] border border-[#bfa14a] bg-gradient-to-b from-[#0a3a3a] to-[#1a5a5a] text-[#bfa14a] font-orbitron font-bold text-[18px] select-none bet-amount-btn"
+        data-amount="1000"
+      >
+        1K
+      </button>
+      <button
+        class="flex-1 max-w-[80px] py-1 rounded-[12px] border border-[#bfa14a] bg-gradient-to-b from-[#0a3a3a] to-[#1a5a5a] text-[#bfa14a] font-orbitron font-bold text-[18px] select-none bet-amount-btn"
+        data-amount="10000"
+      >
+        10K
+      </button>
+      <button
+        class="flex-1 max-w-[80px] py-1 rounded-[12px] border border-[#bfa14a] bg-gradient-to-b from-[#0a3a3a] to-[#1a5a5a] text-[#bfa14a] font-orbitron font-bold text-[18px] select-none bet-amount-btn"
+        data-amount="50000"
+      >
+        50K
+      </button>
+      <button
+        class="flex-1 max-w-[80px] py-1 rounded-[12px] border border-[#bfa14a] bg-gradient-to-b from-[#0a3a3a] to-[#1a5a5a] text-[#bfa14a] font-orbitron font-bold text-[18px] select-none bet-amount-btn"
+        data-amount="100000"
+      >
+        100K
+      </button>
+      <button
+        class="flex-1 max-w-[80px] py-1 rounded-[12px] border border-[#bfa14a] bg-gradient-to-b from-[#0a3a3a] to-[#1a5a5a] text-[#bfa14a] font-orbitron font-bold text-[18px] select-none bet-amount-btn"
+        data-amount="500000"
+      >
+        500K
+      </button>
+      <button
+        class="flex-1 max-w-[80px] py-1 rounded-[12px] border border-[#bfa14a] bg-gradient-to-b from-[#0a3a3a] to-[#1a5a5a] text-[#bfa14a] font-orbitron font-bold text-[18px] select-none bet-amount-btn"
+        data-amount="1000000"
+      >
+        1M
+      </button>
+      <button
+        class="flex-1 max-w-[80px] py-1 rounded-[12px] border border-[#bfa14a] bg-gradient-to-b from-[#0a3a3a] to-[#1a5a5a] text-[#bfa14a] font-orbitron font-bold text-[18px] select-none bet-amount-btn"
+        data-amount="10000000"
+      >
+        10M
+      </button>
+      <button
+        class="flex-1 max-w-[80px] py-1 rounded-[12px] border border-[#bfa14a] bg-gradient-to-b from-[#0a3a3a] to-[#1a5a5a] text-[#bfa14a] font-orbitron font-bold text-[18px] select-none bet-amount-btn"
+        data-amount="50000000"
+      >
+        50M
+      </button>
+    </div>
+    <div
+      class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-4 z-20 w-[620px] max-w-full px-4"
+    >
+      <button
+        id="allInBtn"
+        class="flex-1 py-2 rounded-[40px] bg-gradient-to-b from-[#2a3a9a] to-[#1a2a7a] border border-[#bfa14a] text-[#b7b7ff] font-orbitron font-bold text-[20px] select-none"
+      >
+        ALL IN
+      </button>
+      <button
+        id="placeBetBtn"
+        class="flex-1 py-2 rounded-[40px] bg-gradient-to-b from-[#bfa14a] to-[#e0c14a] border border-[#bfa14a] text-[#f7e9a7] font-orbitron font-bold text-[20px] select-none"
+      >
+        ĐẶT CƯỢC
+      </button>
+      <button
+        id="cancelBetBtn"
+        class="flex-1 py-2 rounded-[40px] bg-gradient-to-b from-[#9a2a2a] to-[#7a1a1a] border border-[#bfa14a] text-[#f7a7a7] font-orbitron font-bold text-[20px] select-none"
+      >
+        HỦY
+      </button>
+    </div>
+  </div>
+
+  <!-- Redeem Code Modal -->
+  <div
+    id="redeemModal"
+    class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-60 hidden"
+  >
+    <div
+      class="bg-gradient-to-b from-[#0a2a4a] to-[#1a4a7a] rounded-3xl p-8 w-full max-w-md text-[#f7e9a7] relative"
+    >
+      <h2 class="text-3xl font-russo mb-6 text-center">Nhập Code</h2>
+      <input
+        id="redeemCodeInput"
+        type="text"
+        placeholder="Nhập code tại đây"
+        class="w-full mb-4 p-3 rounded-lg bg-[#0a1f2f] border border-[#bfa14a] text-[#f7e9a7] font-orbitron text-lg uppercase"
+        autocomplete="off"
+      />
+      <button
+        id="redeemCodeBtn"
+        class="w-full py-3 rounded-2xl bg-gradient-to-b from-[#bfa14a] to-[#e0c14a] font-orbitron font-bold text-xl text-[#0a1f2f] hover:brightness-110 transition"
+      >
+        Xác nhận
+      </button>
+      <button
+        id="closeRedeem"
+        class="absolute top-4 right-4 text-[#bfa14a] text-2xl hover:text-[#e0c14a]"
+        aria-label="Close Redeem Modal"
+      >
+        &times;
+      </button>
+      <p id="redeemMessage" class="text-center text-red-500 mt-2 min-h-[1.25rem]"></p>
+    </div>
+  </div>
+
+  <script>
+    // Elements
+    const authModal = document.getElementById("authModal");
+    const gameUI = document.getElementById("gameUI");
+    const registerForm = document.getElementById("registerForm");
+    const loginForm = document.getElementById("loginForm");
+    const authMessage = document.getElementById("authMessage");
+
+    const regUsername = document.getElementById("regUsername");
+    const regPassword = document.getElementById("regPassword");
+    const registerBtn = document.getElementById("registerBtn");
+    const showLogin = document.getElementById("showLogin");
+
+    const loginUsername = document.getElementById("loginUsername");
+    const loginPassword = document.getElementById("loginPassword");
+    const loginBtn = document.getElementById("loginBtn");
+    const showRegister = document.getElementById("showRegister");
+
+    const closeAuth = document.getElementById("closeAuth");
+
+    const taiXiuBtn = document.getElementById("taiXiuBtn");
+    const taiXiuCard = document.getElementById("taiXiuCard");
+    const cardsContainer = document.getElementById("cardsContainer");
+
+    const userInfoBar = document.getElementById("userInfoBar");
+    const userWelcome = document.getElementById("userWelcome");
+    const userMoneyDisplay = document.getElementById("userMoneyDisplay");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const adminPanelBtn = document.getElementById("adminPanelBtn");
+    const redeemCodeBtnHeader = document.getElementById("redeemCodeBtnHeader");
+
+    const adminModal = document.getElementById("adminModal");
+    const closeAdmin = document.getElementById("closeAdmin");
+    const adminAddMoneyUsername = document.getElementById("adminAddMoneyUsername");
+    const adminAddMoneyAmount = document.getElementById("adminAddMoneyAmount");
+    const adminAddMoneyBtn = document.getElementById("adminAddMoneyBtn");
+    const adminAddMoneyMessage = document.getElementById("adminAddMoneyMessage");
+    const adminCreateCodeAmount = document.getElementById("adminCreateCodeAmount");
+    const adminCreateCodeBtn = document.getElementById("adminCreateCodeBtn");
+    const adminCreateCodeMessage = document.getElementById("adminCreateCodeMessage");
+
+    const redeemModal = document.getElementById("redeemModal");
+    const redeemCodeInput = document.getElementById("redeemCodeInput");
+    const redeemCodeBtn = document.getElementById("redeemCodeBtn");
+    const closeRedeem = document.getElementById("closeRedeem");
+    const redeemMessage = document.getElementById("redeemMessage");
+
+    const totalMoneyEl = document.getElementById("totalMoney");
+    const taiMoneyEl = document.getElementById("taiMoney");
+    const xiuMoneyEl = document.getElementById("xiuMoney");
+    const taiBetAmountBtn = document.getElementById("taiBetAmount");
+    const xiuBetAmountBtn = document.getElementById("xiuBetAmount");
+    const betAmountButtons = document.querySelectorAll(".bet-amount-btn");
+    const placeBetBtn = document.getElementById("placeBetBtn");
+    const cancelBetBtn = document.getElementById("cancelBetBtn");
+    const allInBtn = document.getElementById("allInBtn");
+    const userMoneyDisplayGame = document.getElementById("userMoneyDisplayGame");
+
+    const taiLabel = document.getElementById("taiLabel");
+    const xiuLabel = document.getElementById("xiuLabel");
+
+    const countdownTimer = document.getElementById("countdownTimer");
+    const centerNumberValue = document.getElementById("centerNumberValue");
+    const diceImage = document.getElementById("diceImage");
+
+    const taiHighlight = document.getElementById("taiHighlight");
+    const xiuHighlight = document.getElementById("xiuHighlight");
+
+    const gameCloseBtn = document.getElementById("gameCloseBtn");
+    const allGamesBtn = document.getElementById("allGamesBtn");
+    const roundNumberEl = document.getElementById("roundNumber");
+
+    // State
+    let currentUser = null;
+    let userData = null;
+    let selectedBetAmount = 0;
+    let selectedSide = null; // "tai" or "xiu"
+    let taiBet = 0;
+    let xiuBet = 0;
+
+    let countdown = 30;
+    let countdownInterval = null;
+    let roundActive = true;
+
+    // Round number and cycle max
+    let roundNumber = 1;
+    const maxRoundNumber = 10000;
+
+    // Admin state
+    const ADMIN_USERNAME = "po";
+    const ADMIN_PASSWORD = "123";
+
+    // Codes storage in localStorage key "codes" as array of {code, amount, used}
+    function loadCodes() {
+      const codes = localStorage.getItem("codes");
+      if (codes) return JSON.parse(codes);
+      return [];
+    }
+    function saveCodes(codes) {
+      localStorage.setItem("codes", JSON.stringify(codes));
+    }
+
+    // Helpers
+    function formatMoney(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function saveUserData() {
+      if (!currentUser) return;
+      localStorage.setItem("user_" + currentUser, JSON.stringify(userData));
+    }
+
+    function loadUserData(username) {
+      const data = localStorage.getItem("user_" + username);
+      if (data) {
+        return JSON.parse(data);
+      }
+      return null;
+    }
+
+    function updateUI() {
+      totalMoneyEl.textContent = formatMoney(userData.money);
+      taiMoneyEl.textContent = formatMoney(1574903422);
+      xiuMoneyEl.textContent = formatMoney(335401356);
+      taiBetAmountBtn.textContent = formatMoney(taiBet);
+      xiuBetAmountBtn.textContent = formatMoney(xiuBet);
+      userMoneyDisplay.textContent = formatMoney(userData.money);
+      userMoneyDisplayGame.textContent = formatMoney(userData.money);
+      roundNumberEl.textContent = `#${roundNumber}`;
+
+      // Highlight selected bet amount button
+      betAmountButtons.forEach(btn => {
+        const amount = parseInt(btn.dataset.amount);
+        if (amount === selectedBetAmount) {
+          btn.classList.add("bet-amount-selected");
+        } else {
+          btn.classList.remove("bet-amount-selected");
+        }
+      });
+
+      // Highlight selected side and show highlight overlay
+      if (selectedSide === "tai") {
+        taiLabel.classList.add("side-selected");
+        xiuLabel.classList.remove("side-selected");
+        taiBetAmountBtn.classList.add("side-selected");
+        xiuBetAmountBtn.classList.remove("side-selected");
+        taiHighlight.style.opacity = "1";
+        xiuHighlight.style.opacity = "0";
+      } else if (selectedSide === "xiu") {
+        xiuLabel.classList.add("side-selected");
+        taiLabel.classList.remove("side-selected");
+        xiuBetAmountBtn.classList.add("side-selected");
+        taiBetAmountBtn.classList.remove("side-selected");
+        xiuHighlight.style.opacity = "1";
+        taiHighlight.style.opacity = "0";
+      } else {
+        taiLabel.classList.remove("side-selected");
+        xiuLabel.classList.remove("side-selected");
+        taiBetAmountBtn.classList.remove("side-selected");
+        xiuBetAmountBtn.classList.remove("side-selected");
+        taiHighlight.style.opacity = "0";
+        xiuHighlight.style.opacity = "0";
+      }
+    }
+
+    // Show user info bar with username and money
+    function showUserInfo() {
+      if (!currentUser || !userData) {
+        userInfoBar.classList.add("hidden");
+        return;
+      }
+      userWelcome.textContent = `Xin chào, ${currentUser}${userData.isAdmin ? " (Admin)" : ""}`;
+      userMoneyDisplay.textContent = formatMoney(userData.money);
+      userInfoBar.classList.remove("hidden");
+      // Show admin panel button only for admin
+      if (userData.isAdmin) {
+        adminPanelBtn.classList.remove("hidden");
+      } else {
+        adminPanelBtn.classList.add("hidden");
+      }
+      updateRedeemButton();
+    }
+
+    // Auth handlers
+    showLogin.addEventListener("click", () => {
+      registerForm.classList.add("hidden");
+      loginForm.classList.remove("hidden");
+      authMessage.textContent = "";
+      authMessage.style.color = "red";
+    });
+
+    showRegister.addEventListener("click", () => {
+      loginForm.classList.add("hidden");
+      registerForm.classList.remove("hidden");
+      authMessage.textContent = "";
+      authMessage.style.color = "red";
+    });
+
+    registerBtn.addEventListener("click", () => {
+      const username = regUsername.value.trim();
+      const password = regPassword.value.trim();
+      if (!username || !password) {
+        authMessage.textContent = "Vui lòng nhập đầy đủ thông tin.";
+        authMessage.style.color = "red";
+        return;
+      }
+      if (username.toLowerCase() === ADMIN_USERNAME) {
+        authMessage.textContent = "Tên đăng nhập này đã được sử dụng.";
+        authMessage.style.color = "red";
+        return;
+      }
+      if (localStorage.getItem("user_" + username)) {
+        authMessage.textContent = "Tên đăng nhập đã tồn tại.";
+        authMessage.style.color = "red";
+        return;
+      }
+      // Save new user with 50,000$ money
+      localStorage.setItem(
+        "user_" + username,
+        JSON.stringify({ password, money: 50000 })
+      );
+      authMessage.style.color = "lightgreen";
+      authMessage.textContent = "Đăng ký thành công! Vui lòng đăng nhập.";
+      regUsername.value = "";
+      regPassword.value = "";
+      setTimeout(() => {
+        registerForm.classList.add("hidden");
+        loginForm.classList.remove("hidden");
+        authMessage.textContent = "";
+        authMessage.style.color = "red";
+      }, 1500);
+    });
+
+    loginBtn.addEventListener("click", () => {
+      const username = loginUsername.value.trim();
+      const password = loginPassword.value.trim();
+      if (!username || !password) {
+        authMessage.textContent = "Vui lòng nhập đầy đủ thông tin.";
+        authMessage.style.color = "red";
+        return;
+      }
+      if (username.toLowerCase() === ADMIN_USERNAME) {
+        // Admin login
+        if (password === ADMIN_PASSWORD) {
+          currentUser = ADMIN_USERNAME;
+          // Load admin user data if exists, else create with 0 money
+          let adminData = loadUserData(ADMIN_USERNAME);
+          if (!adminData) {
+            adminData = { password: ADMIN_PASSWORD, money: 0, isAdmin: true };
+            localStorage.setItem("user_" + ADMIN_USERNAME, JSON.stringify(adminData));
+          }
+          userData = adminData;
+          userData.isAdmin = true;
+          authMessage.textContent = "";
+          authModal.style.display = "none";
+          showUserInfo();
+          showHome();
+          updateUI();
+          return;
+        } else {
+          authMessage.textContent = "Mật khẩu không đúng.";
+          authMessage.style.color = "red";
+          return;
+        }
+      }
+      const data = loadUserData(username);
+      if (!data) {
+        authMessage.textContent = "Tài khoản không tồn tại.";
+        authMessage.style.color = "red";
+        return;
+      }
+      if (data.password !== password) {
+        authMessage.textContent = "Mật khẩu không đúng.";
+        authMessage.style.color = "red";
+        return;
+      }
+      // Login success
+      currentUser = username;
+      userData = data;
+      userData.isAdmin = false;
+      authMessage.textContent = "";
+      authModal.style.display = "none";
+      showUserInfo();
+      showHome();
+      updateUI();
+    });
+
+    closeAuth.addEventListener("click", () => {
+      alert("Bạn phải đăng nhập hoặc đăng ký để chơi.");
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      currentUser = null;
+      userData = null;
+      userInfoBar.classList.add("hidden");
+      authModal.style.display = "flex";
+      showHome();
+      updateUI();
+    });
+
+    // Show home cards and hide game UI and admin modal
+    function showHome() {
+      cardsContainer.style.display = "grid";
+      gameUI.classList.add("hidden");
+      adminModal.classList.add("hidden");
+    }
+
+    // Show game UI and hide home cards and admin modal
+    function showGame() {
+      if (!currentUser) {
+        alert("Vui lòng đăng nhập hoặc đăng ký để chơi.");
+        authModal.style.display = "flex";
+        return;
+      }
+      cardsContainer.style.display = "none";
+      gameUI.classList.remove("hidden");
+      adminModal.classList.add("hidden");
+      resetRound();
+      updateUI();
+    }
+
+    // Show admin panel and hide others (only if admin)
+    function showAdminPanel() {
+      if (!userData || !userData.isAdmin) return;
+      cardsContainer.style.display = "none";
+      gameUI.classList.add("hidden");
+      adminModal.classList.remove("hidden");
+      adminAddMoneyUsername.value = "";
+      adminAddMoneyAmount.value = "";
+      adminAddMoneyMessage.textContent = "";
+      adminCreateCodeAmount.value = "";
+      adminCreateCodeMessage.textContent = "";
+    }
+
+    // Handle Tài Xỉu button in nav and card click
+    taiXiuBtn.addEventListener("click", () => {
+      showGame();
+    });
+    taiXiuCard.addEventListener("click", () => {
+      showGame();
+    });
+
+    // Handle ALL GAMES button to go back to home
+    allGamesBtn.addEventListener("click", () => {
+      showHome();
+    });
+    gameCloseBtn.addEventListener("click", () => {
+      showHome();
+    });
+
+    // Bet amount selection
+    betAmountButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (!roundActive) return;
+        selectedBetAmount = parseInt(btn.dataset.amount);
+        updateUI();
+      });
+    });
+
+    // Select side bet
+    taiLabel.addEventListener("click", () => {
+      if (!roundActive) return;
+      if (selectedBetAmount === 0) return;
+      selectedSide = "tai";
+      updateUI();
+    });
+    xiuLabel.addEventListener("click", () => {
+      if (!roundActive) return;
+      if (selectedBetAmount === 0) return;
+      selectedSide = "xiu";
+      updateUI();
+    });
+    taiBetAmountBtn.addEventListener("click", () => {
+      if (!roundActive) return;
+      if (selectedBetAmount === 0) return;
+      selectedSide = "tai";
+      updateUI();
+    });
+    xiuBetAmountBtn.addEventListener("click", () => {
+      if (!roundActive) return;
+      if (selectedBetAmount === 0) return;
+      selectedSide = "xiu";
+      updateUI();
+    });
+
+    // Place bet button
+    placeBetBtn.addEventListener("click", () => {
+      if (!roundActive) {
+        alert("Vòng cược đã kết thúc, vui lòng chờ vòng mới.");
+        return;
+      }
+      if (!selectedSide) {
+        alert("Vui lòng chọn TÀI hoặc XỈU để đặt cược.");
+        return;
+      }
+      if (selectedBetAmount === 0) {
+        alert("Vui lòng chọn số tiền cược.");
+        return;
+      }
+      if (userData.money < selectedBetAmount) {
+        alert("Số dư không đủ để đặt cược.");
+        return;
+      }
+      // Deduct money and add bet
+      userData.money -= selectedBetAmount;
+      if (selectedSide === "tai") {
+        taiBet += selectedBetAmount;
+      } else {
+        xiuBet += selectedBetAmount;
+      }
+      selectedBetAmount = 0;
+      selectedSide = null;
+      saveUserData();
+      updateUI();
+      showUserInfo();
+    });
+
+    // Cancel bet button
+    cancelBetBtn.addEventListener("click", () => {
+      if (!roundActive) {
+        alert("Vòng cược đã kết thúc, không thể hủy.");
+        return;
+      }
+      // Refund bets
+      userData.money += taiBet + xiuBet;
+      taiBet = 0;
+      xiuBet = 0;
+      selectedBetAmount = 0;
+      selectedSide = null;
+      saveUserData();
+      updateUI();
+      showUserInfo();
+    });
+
+    // All in button
+    allInBtn.addEventListener("click", () => {
+      if (!roundActive) return;
+      if (userData.money <= 0) {
+        alert("Bạn không có tiền để ALL IN.");
+        return;
+      }
+      selectedBetAmount = userData.money;
+      updateUI();
+    });
+
+    // Round and countdown logic
+    function resetRound() {
+      countdown = 30;
+      roundActive = true;
+      countdownTimer.textContent = countdown;
+      countdownTimer.style.opacity = "1";
+      centerNumberValue.style.opacity = "0";
+      diceImage.style.opacity = "0";
+      diceImage.classList.remove("shake");
+      taiBet = 0;
+      xiuBet = 0;
+      selectedBetAmount = 0;
+      selectedSide = null;
+      updateUI();
+      roundNumber++;
+      if (roundNumber > maxRoundNumber) {
+        roundNumber = 1;
+      }
+      roundNumberEl.textContent = `#${roundNumber}`;
+      if (countdownInterval) clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown < 0) {
+          clearInterval(countdownInterval);
+          countdownTimer.textContent = "0";
+          roundActive = false;
+          revealDice();
+        } else {
+          countdownTimer.textContent = countdown;
+        }
+      }, 1000);
+    }
+
+    // Reveal dice and result
+    function revealDice() {
+      const dice1 = Math.floor(Math.random() * 6) + 1;
+      const dice2 = Math.floor(Math.random() * 6) + 1;
+      const dice3 = Math.floor(Math.random() * 6) + 1;
+      const sum = dice1 + dice2 + dice3;
+
+      centerNumberValue.textContent = sum;
+      centerNumberValue.style.opacity = "1";
+      countdownTimer.style.opacity = "0";
+
+      // Show all three dice images side by side inside centerNumber container
+      diceImage.style.opacity = "0";
+      diceImage.classList.remove("shake");
+
+      // Remove old dice images if any
+      const oldDiceImgs = document.querySelectorAll("#centerNumber .dice-face");
+      oldDiceImgs.forEach(img => img.remove());
+
+      // Create dice images for dice1, dice2, dice3
+      [dice1, dice2, dice3].forEach((num, idx) => {
+        const img = document.createElement("img");
+        img.src = getDiceFaceImage(num);
+        img.alt = `Dice face showing ${num}`;
+        img.className = "dice-face absolute w-16 h-16 top-1/2 -translate-y-1/2 transition-opacity duration-700";
+        img.style.left = `calc(50% + ${(idx - 1) * 40}px)`;
+        img.style.transform = "translateX(-50%) translateY(-50%)";
+        img.style.opacity = "1";
+        img.draggable = false;
+        img.style.zIndex = "15";
+        img.style.filter = "drop-shadow(0 0 2px #bfa14a)";
+        img.style.animation = "shake 1s ease-in-out";
+        document.getElementById("centerNumber").appendChild(img);
+      });
+
+      const result = sum >= 11 ? "tai" : "xiu";
+
+      setTimeout(() => {
+        alert(`Kết quả: ${sum} - ${result.toUpperCase()}`);
+
+        if (result === "tai" && taiBet > 0) {
+          userData.money += taiBet * 2;
+        } else if (result === "xiu" && xiuBet > 0) {
+          userData.money += xiuBet * 2;
+        }
+        taiBet = 0;
+        xiuBet = 0;
+        saveUserData();
+        updateUI();
+        showUserInfo();
+
+        setTimeout(() => {
+          countdownTimer.style.opacity = "1";
+          centerNumberValue.style.opacity = "0";
+          // Remove dice images
+          const diceImgs = document.querySelectorAll("#centerNumber .dice-face");
+          diceImgs.forEach(img => img.remove());
+          resetRound();
+        }, 3000);
+      }, 1500);
+    }
+
+    function getDiceFaceImage(num) {
+      return `https://placehold.co/80x80/png?text=${num}&font=Russo+One&font-size=48&bg=1a1a1a&fg=f7e9a7&border=2&border-color=bfa14a`;
+    }
+
+    // Admin modal close
+    closeAdmin.addEventListener("click", () => {
+      adminModal.classList.add("hidden");
+      showUserInfo();
+      showHome();
+    });
+
+    // Admin add money button
+    adminAddMoneyBtn.addEventListener("click", () => {
+      const username = adminAddMoneyUsername.value.trim();
+      const amountStr = adminAddMoneyAmount.value.trim();
+      const amount = parseInt(amountStr, 10);
+      adminAddMoneyMessage.style.color = "red";
+      if (!username) {
+        adminAddMoneyMessage.textContent = "Vui lòng nhập tên đăng nhập người chơi.";
+        return;
+      }
+      if (!amountStr || isNaN(amount) || amount <= 0) {
+        adminAddMoneyMessage.textContent = "Số tiền thêm không hợp lệ.";
+        return;
+      }
+      // Admin can add money to any user including admin
+      const user = loadUserData(username);
+      if (!user) {
+        adminAddMoneyMessage.textContent = "Người chơi không tồn tại.";
+        return;
+      }
+      user.money = (user.money || 0) + amount;
+      localStorage.setItem("user_" + username, JSON.stringify(user));
+      adminAddMoneyMessage.style.color = "lightgreen";
+      adminAddMoneyMessage.textContent = `Đã thêm ${formatMoney(amount)}$ cho ${username}.`;
+      adminAddMoneyUsername.value = "";
+      adminAddMoneyAmount.value = "";
+      // If current user is updated, refresh UI
+      if (username.toLowerCase() === currentUser) {
+        userData = user;
+        updateUI();
+        showUserInfo();
+      }
+    });
+
+    // Admin create code button
+    adminCreateCodeBtn.addEventListener("click", () => {
+      const amountStr = adminCreateCodeAmount.value.trim();
+      const amount = parseInt(amountStr, 10);
+      adminCreateCodeMessage.style.color = "red";
+      if (!amountStr || isNaN(amount) || amount <= 0) {
+        adminCreateCodeMessage.textContent = "Số tiền code không hợp lệ.";
+        return;
+      }
+      // Generate unique code: 8 chars alphanumeric uppercase
+      let code;
+      const codes = loadCodes();
+      do {
+        code = generateCode(8);
+      } while (codes.find(c => c.code === code));
+      codes.push({ code, amount, used: false });
+      saveCodes(codes);
+      adminCreateCodeMessage.style.color = "lightgreen";
+      adminCreateCodeMessage.textContent = `Code: ${code} (${formatMoney(amount)}$) - Ai cũng có thể nhập`;
+      adminCreateCodeAmount.value = "";
+    });
+
+    function generateCode(length) {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let result = "";
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+
+    // Redeem code modal handlers
+    redeemCodeBtnHeader.addEventListener("click", () => {
+      redeemCodeInput.value = "";
+      redeemMessage.textContent = "";
+      redeemModal.classList.remove("hidden");
+      redeemCodeInput.focus();
+    });
+
+    closeRedeem.addEventListener("click", () => {
+      redeemModal.classList.add("hidden");
+    });
+
+    redeemCodeBtn.addEventListener("click", () => {
+      const codeInput = redeemCodeInput.value.trim().toUpperCase();
+      redeemMessage.style.color = "red";
+      if (!codeInput) {
+        redeemMessage.textContent = "Vui lòng nhập code.";
+        return;
+      }
+      const codes = loadCodes();
+      const codeObj = codes.find(c => c.code === codeInput);
+      if (!codeObj) {
+        redeemMessage.textContent = "Code không tồn tại.";
+        return;
+      }
+      if (codeObj.used) {
+        redeemMessage.textContent = "Code đã được sử dụng.";
+        return;
+      }
+      // Redeem code for current user
+      userData.money = (userData.money || 0) + codeObj.amount;
+      saveUserData();
+      codeObj.used = true;
+      saveCodes(codes);
+      redeemMessage.style.color = "lightgreen";
+      redeemMessage.textContent = `Bạn đã nhận được ${formatMoney(codeObj.amount)}$ từ code.`;
+      updateUI();
+      showUserInfo();
+    });
+
+    // Update redeem button visibility on login/logout
+    function updateRedeemButton() {
+      if (currentUser && userData) {
+        redeemCodeBtnHeader.style.display = "inline-block";
+      } else {
+        redeemCodeBtnHeader.style.display = "none";
+      }
+    }
+
+    // Admin panel button click
+    adminPanelBtn.addEventListener("click", () => {
+      showAdminPanel();
+    });
+
+    // On page load show auth modal
+    authModal.style.display = "flex";
+    gameUI.classList.add("hidden");
+    cardsContainer.style.display = "grid";
+
+  </script>
+</body>
+</html>
